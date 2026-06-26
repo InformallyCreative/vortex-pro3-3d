@@ -18111,6 +18111,76 @@
       return new _CylinderGeometry(data.radiusTop, data.radiusBottom, data.height, data.radialSegments, data.heightSegments, data.openEnded, data.thetaStart, data.thetaLength);
     }
   };
+  var SphereGeometry = class _SphereGeometry extends BufferGeometry {
+    constructor(radius = 1, widthSegments = 32, heightSegments = 16, phiStart = 0, phiLength = Math.PI * 2, thetaStart = 0, thetaLength = Math.PI) {
+      super();
+      this.type = "SphereGeometry";
+      this.parameters = {
+        radius,
+        widthSegments,
+        heightSegments,
+        phiStart,
+        phiLength,
+        thetaStart,
+        thetaLength
+      };
+      widthSegments = Math.max(3, Math.floor(widthSegments));
+      heightSegments = Math.max(2, Math.floor(heightSegments));
+      const thetaEnd = Math.min(thetaStart + thetaLength, Math.PI);
+      let index = 0;
+      const grid = [];
+      const vertex2 = new Vector3();
+      const normal = new Vector3();
+      const indices = [];
+      const vertices = [];
+      const normals = [];
+      const uvs = [];
+      for (let iy = 0; iy <= heightSegments; iy++) {
+        const verticesRow = [];
+        const v = iy / heightSegments;
+        let uOffset = 0;
+        if (iy === 0 && thetaStart === 0) {
+          uOffset = 0.5 / widthSegments;
+        } else if (iy === heightSegments && thetaEnd === Math.PI) {
+          uOffset = -0.5 / widthSegments;
+        }
+        for (let ix = 0; ix <= widthSegments; ix++) {
+          const u = ix / widthSegments;
+          vertex2.x = -radius * Math.cos(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+          vertex2.y = radius * Math.cos(thetaStart + v * thetaLength);
+          vertex2.z = radius * Math.sin(phiStart + u * phiLength) * Math.sin(thetaStart + v * thetaLength);
+          vertices.push(vertex2.x, vertex2.y, vertex2.z);
+          normal.copy(vertex2).normalize();
+          normals.push(normal.x, normal.y, normal.z);
+          uvs.push(u + uOffset, 1 - v);
+          verticesRow.push(index++);
+        }
+        grid.push(verticesRow);
+      }
+      for (let iy = 0; iy < heightSegments; iy++) {
+        for (let ix = 0; ix < widthSegments; ix++) {
+          const a = grid[iy][ix + 1];
+          const b = grid[iy][ix];
+          const c = grid[iy + 1][ix];
+          const d = grid[iy + 1][ix + 1];
+          if (iy !== 0 || thetaStart > 0) indices.push(a, b, d);
+          if (iy !== heightSegments - 1 || thetaEnd < Math.PI) indices.push(b, c, d);
+        }
+      }
+      this.setIndex(indices);
+      this.setAttribute("position", new Float32BufferAttribute(vertices, 3));
+      this.setAttribute("normal", new Float32BufferAttribute(normals, 3));
+      this.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
+    }
+    copy(source) {
+      super.copy(source);
+      this.parameters = Object.assign({}, source.parameters);
+      return this;
+    }
+    static fromJSON(data) {
+      return new _SphereGeometry(data.radius, data.widthSegments, data.heightSegments, data.phiStart, data.phiLength, data.thetaStart, data.thetaLength);
+    }
+  };
   var TorusGeometry = class _TorusGeometry extends BufferGeometry {
     constructor(radius = 1, tube = 0.4, radialSegments = 12, tubularSegments = 48, arc = Math.PI * 2) {
       super();
@@ -18259,6 +18329,139 @@
       this.wireframeLinejoin = source.wireframeLinejoin;
       this.flatShading = source.flatShading;
       this.fog = source.fog;
+      return this;
+    }
+  };
+  var MeshPhysicalMaterial = class extends MeshStandardMaterial {
+    constructor(parameters) {
+      super();
+      this.isMeshPhysicalMaterial = true;
+      this.defines = {
+        "STANDARD": "",
+        "PHYSICAL": ""
+      };
+      this.type = "MeshPhysicalMaterial";
+      this.anisotropyRotation = 0;
+      this.anisotropyMap = null;
+      this.clearcoatMap = null;
+      this.clearcoatRoughness = 0;
+      this.clearcoatRoughnessMap = null;
+      this.clearcoatNormalScale = new Vector2(1, 1);
+      this.clearcoatNormalMap = null;
+      this.ior = 1.5;
+      Object.defineProperty(this, "reflectivity", {
+        get: function() {
+          return clamp(2.5 * (this.ior - 1) / (this.ior + 1), 0, 1);
+        },
+        set: function(reflectivity) {
+          this.ior = (1 + 0.4 * reflectivity) / (1 - 0.4 * reflectivity);
+        }
+      });
+      this.iridescenceMap = null;
+      this.iridescenceIOR = 1.3;
+      this.iridescenceThicknessRange = [100, 400];
+      this.iridescenceThicknessMap = null;
+      this.sheenColor = new Color(0);
+      this.sheenColorMap = null;
+      this.sheenRoughness = 1;
+      this.sheenRoughnessMap = null;
+      this.transmissionMap = null;
+      this.thickness = 0;
+      this.thicknessMap = null;
+      this.attenuationDistance = Infinity;
+      this.attenuationColor = new Color(1, 1, 1);
+      this.specularIntensity = 1;
+      this.specularIntensityMap = null;
+      this.specularColor = new Color(1, 1, 1);
+      this.specularColorMap = null;
+      this._anisotropy = 0;
+      this._clearcoat = 0;
+      this._iridescence = 0;
+      this._sheen = 0;
+      this._transmission = 0;
+      this.setValues(parameters);
+    }
+    get anisotropy() {
+      return this._anisotropy;
+    }
+    set anisotropy(value) {
+      if (this._anisotropy > 0 !== value > 0) {
+        this.version++;
+      }
+      this._anisotropy = value;
+    }
+    get clearcoat() {
+      return this._clearcoat;
+    }
+    set clearcoat(value) {
+      if (this._clearcoat > 0 !== value > 0) {
+        this.version++;
+      }
+      this._clearcoat = value;
+    }
+    get iridescence() {
+      return this._iridescence;
+    }
+    set iridescence(value) {
+      if (this._iridescence > 0 !== value > 0) {
+        this.version++;
+      }
+      this._iridescence = value;
+    }
+    get sheen() {
+      return this._sheen;
+    }
+    set sheen(value) {
+      if (this._sheen > 0 !== value > 0) {
+        this.version++;
+      }
+      this._sheen = value;
+    }
+    get transmission() {
+      return this._transmission;
+    }
+    set transmission(value) {
+      if (this._transmission > 0 !== value > 0) {
+        this.version++;
+      }
+      this._transmission = value;
+    }
+    copy(source) {
+      super.copy(source);
+      this.defines = {
+        "STANDARD": "",
+        "PHYSICAL": ""
+      };
+      this.anisotropy = source.anisotropy;
+      this.anisotropyRotation = source.anisotropyRotation;
+      this.anisotropyMap = source.anisotropyMap;
+      this.clearcoat = source.clearcoat;
+      this.clearcoatMap = source.clearcoatMap;
+      this.clearcoatRoughness = source.clearcoatRoughness;
+      this.clearcoatRoughnessMap = source.clearcoatRoughnessMap;
+      this.clearcoatNormalMap = source.clearcoatNormalMap;
+      this.clearcoatNormalScale.copy(source.clearcoatNormalScale);
+      this.ior = source.ior;
+      this.iridescence = source.iridescence;
+      this.iridescenceMap = source.iridescenceMap;
+      this.iridescenceIOR = source.iridescenceIOR;
+      this.iridescenceThicknessRange = [...source.iridescenceThicknessRange];
+      this.iridescenceThicknessMap = source.iridescenceThicknessMap;
+      this.sheen = source.sheen;
+      this.sheenColor.copy(source.sheenColor);
+      this.sheenColorMap = source.sheenColorMap;
+      this.sheenRoughness = source.sheenRoughness;
+      this.sheenRoughnessMap = source.sheenRoughnessMap;
+      this.transmission = source.transmission;
+      this.transmissionMap = source.transmissionMap;
+      this.thickness = source.thickness;
+      this.thicknessMap = source.thicknessMap;
+      this.attenuationDistance = source.attenuationDistance;
+      this.attenuationColor.copy(source.attenuationColor);
+      this.specularIntensity = source.specularIntensity;
+      this.specularIntensityMap = source.specularIntensityMap;
+      this.specularColor.copy(source.specularColor);
+      this.specularColorMap = source.specularColorMap;
       return this;
     }
   };
@@ -20655,7 +20858,7 @@
   ground.receiveShadow = true;
   scene.add(ground);
   var M = {
-    cover: new MeshStandardMaterial({ color: 16316661, metalness: 0.06, roughness: 0.3, envMapIntensity: 1.1 }),
+    cover: new MeshPhysicalMaterial({ color: 16316661, metalness: 0, roughness: 0.34, clearcoat: 0.7, clearcoatRoughness: 0.28, envMapIntensity: 1.1 }),
     frame: new MeshStandardMaterial({ color: 2894894, metalness: 0.3, roughness: 0.55 }),
     frameDk: new MeshStandardMaterial({ color: 2105378, metalness: 0.35, roughness: 0.5 }),
     housing: new MeshStandardMaterial({ color: 16053230, metalness: 0, roughness: 0.5 }),
@@ -20754,18 +20957,59 @@
     head.add(kh);
   });
   root.add(reg(head, [0, 1, 0], 13, 1));
+  function gaugeTex() {
+    const c = document.createElement("canvas");
+    c.width = c.height = 256;
+    const g2 = c.getContext("2d");
+    g2.fillStyle = "#f6f4ec";
+    g2.beginPath();
+    g2.arc(128, 128, 124, 0, 7);
+    g2.fill();
+    g2.strokeStyle = "#1a1712";
+    g2.lineWidth = 5;
+    g2.beginPath();
+    g2.arc(128, 128, 121, 0, 7);
+    g2.stroke();
+    for (let i = 0; i <= 10; i++) {
+      const a = Math.PI * 0.75 + i / 10 * Math.PI * 1.5, r1 = i % 5 === 0 ? 98 : 106, r2 = 118;
+      g2.lineWidth = i % 5 === 0 ? 5 : 2.5;
+      g2.strokeStyle = "#1a1712";
+      g2.beginPath();
+      g2.moveTo(128 + Math.cos(a) * r1, 128 + Math.sin(a) * r1);
+      g2.lineTo(128 + Math.cos(a) * r2, 128 + Math.sin(a) * r2);
+      g2.stroke();
+    }
+    g2.fillStyle = "#6f695c";
+    g2.font = "bold 20px Arial";
+    g2.textAlign = "center";
+    g2.fillText("kPa", 128, 176);
+    const na = Math.PI * 0.75 + 0.55 * Math.PI * 1.5;
+    g2.strokeStyle = "#c0392b";
+    g2.lineWidth = 6;
+    g2.lineCap = "round";
+    g2.beginPath();
+    g2.moveTo(128, 128);
+    g2.lineTo(128 + Math.cos(na) * 90, 128 + Math.sin(na) * 90);
+    g2.stroke();
+    g2.fillStyle = "#1a1712";
+    g2.beginPath();
+    g2.arc(128, 128, 10, 0, 7);
+    g2.fill();
+    const t = new CanvasTexture(c);
+    t.anisotropy = 8;
+    return t;
+  }
+  var gTex = gaugeTex();
   var gauges = new Group();
   xs.forEach((x) => {
-    const bezel = cyl(2.5, 2.5, 1, M.chrome, 40);
-    bezel.position.set(x, H - 3.9, D * 0.18);
-    const face = cyl(2, 2, 0.5, M.gFace, 40);
-    face.position.set(x, H - 3.5, D * 0.18);
-    const needle = box(1.6, 0.18, 0.18, M.ink);
-    needle.position.set(x + 0.3, H - 3.25, D * 0.18);
-    needle.rotation.z = 0.7;
-    const stem = cyl(0.7, 0.7, 1.6, M.chrome);
-    stem.position.set(x, H - 5, D * 0.18);
-    gauges.add(bezel, face, needle, stem);
+    const ring = cyl(2.7, 2.7, 1.4, M.chrome, 40);
+    ring.position.set(x, H - 4, D * 0.18);
+    const dial = new Mesh(new CircleGeometry(2.35, 40), new MeshBasicMaterial({ map: gTex }));
+    dial.rotation.x = -Math.PI / 2;
+    dial.position.set(x, H - 3.28, D * 0.18);
+    const stem = cyl(0.7, 0.7, 1.8, M.chrome);
+    stem.position.set(x, H - 5.3, D * 0.18);
+    gauges.add(ring, dial, stem);
   });
   root.add(reg(gauges, [0, 1, 0], 20, 8));
   var reds = new Group();
@@ -20796,15 +21040,15 @@
     }
     root.add(reg(cap, [0, 1, 0], 9, 1));
     const bowl = new Group();
-    const sump = cyl(bowlR, bowlR, sumpH, M.housing);
+    const sump = cyl(bowlR, bowlR, sumpH, M.housing, 40);
     sump.position.set(x, sumpBot + sumpH / 2, 0);
-    const round = cyl(bowlR, bowlR * 0.8, 2.2, M.housing);
-    round.position.set(x, sumpBot + 0.4, 0);
-    bowl.add(sump, round);
-    for (let k = 0; k < 18; k++) {
-      const a = k / 18 * Math.PI * 2;
-      const fl = box(0.7, sumpH * 0.34, 0.7, M.housing);
-      fl.position.set(x + Math.cos(a) * bowlR, sumpTop - 2 - sumpH * 0.17, Math.sin(a) * bowlR);
+    const dome = new Mesh(new SphereGeometry(bowlR, 32, 18, 0, Math.PI * 2, Math.PI * 0.5, Math.PI * 0.5), M.housing);
+    dome.position.set(x, sumpBot, 0);
+    bowl.add(sump, dome);
+    for (let k = 0; k < 22; k++) {
+      const a = k / 22 * Math.PI * 2;
+      const fl = box(0.5, sumpH * 0.6, 0.5, M.housing);
+      fl.position.set(x + Math.cos(a) * bowlR, sumpBot + sumpH * 0.52, Math.sin(a) * bowlR);
       bowl.add(fl);
     }
     root.add(reg(bowl, [0, -1, 0.06], 9, 4));
