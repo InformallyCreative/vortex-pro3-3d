@@ -8,115 +8,89 @@
 <style>
   :root{ --ink:#1a1712; --sand:#d9d4c7; --muted:#9b9484; --line:#e2ddd0; }
   *{ box-sizing:border-box; }
-  html,body{ margin:0; height:100%; overflow:hidden; font-family:'Hanken Grotesk',system-ui,sans-serif; background:#c9c4b8; color:var(--ink); }
-  #app{ position:fixed; inset:0; }
-  canvas{ display:block; }
-
-  /* top bar */
+  html,body{ margin:0; height:100%; overflow:hidden; font-family:'Hanken Grotesk',system-ui,sans-serif; background:#e7e3da; color:var(--ink); }
+  #app{ position:fixed; inset:0; } canvas{ display:block; touch-action:none; }
   .topbar{ position:absolute; top:0; left:0; right:0; padding:18px 24px; display:flex; align-items:center; justify-content:space-between;
-           background:linear-gradient(180deg,rgba(20,18,14,.55),rgba(20,18,14,0)); pointer-events:none; z-index:5; }
+           background:linear-gradient(180deg,rgba(20,18,14,.4),rgba(20,18,14,0)); pointer-events:none; z-index:5; }
   .brand{ font-family:Figtree; font-weight:800; letter-spacing:.12em; font-size:18px; color:#fff; }
-  .brand small{ display:block; font-weight:600; letter-spacing:.18em; font-size:10px; color:#e9e4d8; opacity:.85; margin-top:2px; }
+  .brand small{ display:block; font-weight:600; letter-spacing:.18em; font-size:10px; color:#f3efe6; opacity:.9; margin-top:2px; }
   .title{ text-align:right; color:#fff; }
-  .title b{ font-family:Figtree; font-weight:700; font-size:15px; letter-spacing:.01em; }
-  .title span{ display:block; font-size:11px; letter-spacing:.16em; color:#e9e4d8; opacity:.8; text-transform:uppercase; margin-top:2px; }
+  .title b{ font-family:Figtree; font-weight:700; font-size:15px; }
+  .title span{ display:block; font-size:11px; letter-spacing:.16em; opacity:.85; text-transform:uppercase; margin-top:2px; }
 
-  /* control dock */
-  .dock{ position:absolute; left:50%; bottom:22px; transform:translateX(-50%); z-index:6;
-         background:rgba(26,23,18,.86); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,.08);
-         border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:18px; color:#fff;
+  .dock{ position:absolute; left:50%; bottom:22px; transform:translateX(-50%); z-index:6; background:rgba(26,23,18,.88); backdrop-filter:blur(10px);
+         border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:14px 18px; display:flex; align-items:center; gap:18px; color:#fff;
          box-shadow:0 18px 50px rgba(0,0,0,.35); max-width:calc(100vw - 32px); }
   .dock .group{ display:flex; align-items:center; gap:10px; }
   .dock label{ font-family:Figtree; font-weight:700; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:#cfc8b8; }
-  input[type=range]{ -webkit-appearance:none; appearance:none; width:230px; height:5px; border-radius:5px;
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:220px; height:5px; border-radius:5px;
     background:linear-gradient(90deg,#e9e4d8 0%,#e9e4d8 var(--p,0%),rgba(255,255,255,.18) var(--p,0%)); outline:none; }
   input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:#fff; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.4); border:2px solid var(--ink);}
   input[type=range]::-moz-range-thumb{ width:18px; height:18px; border-radius:50%; background:#fff; cursor:pointer; border:2px solid var(--ink);}
-  .btn{ font-family:Figtree; font-weight:700; font-size:12px; letter-spacing:.02em; color:var(--ink); background:#e9e4d8;
-        border:none; border-radius:10px; padding:9px 14px; cursor:pointer; transition:transform .08s, background .15s; white-space:nowrap; }
+  .btn{ font-family:Figtree; font-weight:700; font-size:12px; color:var(--ink); background:#e9e4d8; border:none; border-radius:10px; padding:9px 14px; cursor:pointer; transition:transform .08s,background .15s; white-space:nowrap; }
   .btn:hover{ background:#fff; } .btn:active{ transform:translateY(1px); }
-  .btn.ghost{ background:transparent; color:#e9e4d8; border:1px solid rgba(255,255,255,.22); }
-  .btn.ghost:hover{ background:rgba(255,255,255,.1); color:#fff; }
-  .btn.on{ background:#fff; }
+  .btn.ghost{ background:transparent; color:#e9e4d8; border:1px solid rgba(255,255,255,.22); } .btn.ghost:hover{ background:rgba(255,255,255,.1); color:#fff; } .btn.ghost.on{ background:#fff; color:var(--ink); }
   .sep{ width:1px; height:30px; background:rgba(255,255,255,.14); }
 
-  /* legend */
-  .legend{ position:absolute; top:84px; left:24px; z-index:5; width:260px;
-           background:rgba(255,255,255,.92); backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:14px;
-           padding:16px 16px 12px; box-shadow:0 12px 36px rgba(0,0,0,.16); }
-  .legend h3{ font-family:Figtree; font-weight:800; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); margin:0 0 4px; }
+  .legend{ position:absolute; top:84px; left:24px; z-index:5; width:266px; background:rgba(255,255,255,.93); backdrop-filter:blur(6px);
+           border:1px solid var(--line); border-radius:14px; padding:16px 16px 12px; box-shadow:0 12px 36px rgba(0,0,0,.16); }
+  .legend h3{ font-family:Figtree; font-weight:800; font-size:11px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 4px; }
   .legend .sub{ font-size:11px; color:var(--muted); margin:0 0 10px; }
   .legend ol{ list-style:none; margin:0; padding:0; }
-  .legend li{ display:flex; gap:10px; align-items:flex-start; padding:6px 0; border-top:1px solid var(--line); font-size:12.5px; cursor:default; }
-  .legend li:first-of-type{ border-top:none; }
-  .legend li{ cursor:pointer; border-radius:8px; transition:background .12s; padding-left:4px; padding-right:4px; }
-  .legend li:hover{ background:#f1ece0; }
-  .legend li.active{ background:var(--ink); color:#fff; }
-  .legend li.active span, .legend li.active b{ color:#fff; }
-  .legend li.active .n{ background:#fff; color:var(--ink); }
-  .legend .n{ font-family:Figtree; font-weight:700; font-size:10px; color:#fff; background:var(--ink); min-width:19px; height:19px; border-radius:50%;
-              display:flex; align-items:center; justify-content:center; margin-top:1px; }
-  .legend li b{ font-family:Figtree; font-weight:700; }
-  .legend li span{ color:#6f695c; }
+  .legend li{ display:flex; gap:10px; align-items:flex-start; padding:6px 4px; border-top:1px solid var(--line); font-size:12.5px; cursor:pointer; border-radius:8px; transition:background .12s; }
+  .legend li:first-of-type{ border-top:none; } .legend li:hover{ background:#f1ece0; }
+  .legend li.active{ background:var(--ink); color:#fff; } .legend li.active span,.legend li.active b{ color:#fff; } .legend li.active .n{ background:#fff; color:var(--ink); }
+  .legend .n{ font-family:Figtree; font-weight:700; font-size:10px; color:#fff; background:var(--ink); min-width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+  .legend li b{ font-family:Figtree; font-weight:700; } .legend li span{ color:#6f695c; }
   .legend .foot{ font-size:10px; color:var(--muted); margin-top:8px; padding-top:8px; border-top:1px solid var(--line); line-height:1.4; }
 
-  /* part labels (CSS2D) */
-  .plabel{ font-family:Figtree; font-weight:700; font-size:11px; color:#fff; background:rgba(26,23,18,.9);
-           padding:3px 8px; border-radius:20px; white-space:nowrap; border:1px solid rgba(255,255,255,.18);
-           transform:translate(-50%,-50%); pointer-events:none; box-shadow:0 4px 12px rgba(0,0,0,.3); }
+  .plabel{ font-family:Figtree; font-weight:700; font-size:11px; color:#fff; background:rgba(26,23,18,.9); padding:3px 8px; border-radius:20px; white-space:nowrap; border:1px solid rgba(255,255,255,.18); transform:translate(-50%,-50%); pointer-events:none; box-shadow:0 4px 12px rgba(0,0,0,.3); }
   .plabel .pn{ display:inline-block; color:#1a1712; background:#e9e4d8; width:15px; height:15px; border-radius:50%; text-align:center; line-height:15px; margin-right:5px; font-size:9px; }
+  .stage{ font-family:Figtree; font-weight:700; font-size:9px; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:rgba(26,23,18,.7); padding:2px 7px; border-radius:12px; transform:translate(-50%,-50%); pointer-events:none; }
 
-  #loader{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; z-index:20; background:#c9c4b8; transition:opacity .5s; }
-  #loader .spin{ width:38px; height:38px; border:3px solid rgba(26,23,18,.2); border-top-color:var(--ink); border-radius:50%; animation:sp 1s linear infinite; }
-  #loader p{ font-family:Figtree; font-weight:600; letter-spacing:.04em; color:var(--ink); font-size:13px; }
-  @keyframes sp{ to{ transform:rotate(360deg); } }
-  /* spec callout */
-  .callout{ position:absolute; right:24px; top:84px; z-index:6; width:288px; opacity:0; pointer-events:none;
-            background:rgba(26,23,18,.92); backdrop-filter:blur(10px); color:#fff; border:1px solid rgba(255,255,255,.1);
-            border-radius:16px; padding:18px 18px 16px; box-shadow:0 18px 50px rgba(0,0,0,.4); transition:opacity .2s, transform .2s;
-            transform:translateY(-6px); }
+  .callout{ position:absolute; right:24px; top:84px; z-index:6; width:290px; opacity:0; pointer-events:none; background:rgba(26,23,18,.93); backdrop-filter:blur(10px); color:#fff;
+            border:1px solid rgba(255,255,255,.1); border-radius:16px; padding:18px; box-shadow:0 18px 50px rgba(0,0,0,.4); transition:opacity .2s,transform .2s; transform:translateY(-6px); }
   .callout.show{ opacity:1; pointer-events:auto; transform:translateY(0); }
   .callout .top{ display:flex; align-items:center; gap:10px; }
-  .callout .cn{ font-family:Figtree; font-weight:800; font-size:13px; color:var(--ink); background:#e9e4d8; width:28px; height:28px;
-                border-radius:50%; display:flex; align-items:center; justify-content:center; }
-  .callout .ct{ font-family:Figtree; font-weight:700; font-size:16px; letter-spacing:-.01em; }
+  .callout .cn{ font-family:Figtree; font-weight:800; font-size:13px; color:var(--ink); background:#e9e4d8; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+  .callout .ct{ font-family:Figtree; font-weight:700; font-size:16px; }
   .callout .cd{ font-size:12.5px; line-height:1.55; color:#d7d1c3; margin:12px 0 0; }
-  .callout .x{ position:absolute; top:12px; right:14px; cursor:pointer; color:#cfc8b8; font-size:18px; line-height:1; background:none; border:none; }
-  .callout .x:hover{ color:#fff; }
-  .hint{ position:absolute; bottom:96px; left:50%; transform:translateX(-50%); z-index:4; font-size:11px; color:rgba(26,23,18,.55); letter-spacing:.04em; }
-  @media (max-width:720px){ .legend{ display:none; } input[type=range]{ width:150px; } .dock{ gap:10px; padding:12px; } }
+  .callout .x{ position:absolute; top:12px; right:14px; cursor:pointer; color:#cfc8b8; font-size:18px; background:none; border:none; } .callout .x:hover{ color:#fff; }
+
+  #loader{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:14px; z-index:20; background:#e7e3da; transition:opacity .5s; pointer-events:none; }
+  #loader .spin{ width:38px; height:38px; border:3px solid rgba(26,23,18,.2); border-top-color:var(--ink); border-radius:50%; animation:sp 1s linear infinite; }
+  #loader p{ font-family:Figtree; font-weight:600; color:var(--ink); font-size:13px; }
+  @keyframes sp{ to{ transform:rotate(360deg); } }
+  .hint{ position:absolute; bottom:96px; left:50%; transform:translateX(-50%); z-index:4; font-size:11px; color:rgba(26,23,18,.55); pointer-events:none; }
+  @media (max-width:720px){ .legend{ display:none; } input[type=range]{ width:140px; } .dock{ gap:10px; padding:12px; } .callout{ width:240px; } }
 </style>
 </head>
 <body>
 <div id="app"></div>
-
-<div class="topbar">
-  <div class="brand">WFD<small>WATERFILTER.DIRECT</small></div>
-  <div class="title"><b>Vortex-Pro-III</b><span>Interactive Exploded View</span></div>
-</div>
+<div class="topbar"><div class="brand">WFD<small>WATERFILTER.DIRECT</small></div><div class="title"><b>Vortex-Pro-III</b><span>Interactive Exploded View</span></div></div>
 
 <div class="legend">
   <h3>Components</h3>
   <p class="sub">3-stage whole-home filtration · 595 × 752 × 212 mm</p>
   <ol>
+    <li data-num="10"><span class="n">10</span><div><b>Front cover</b> <span>/ lockable cabinet</span></div></li>
     <li data-num="1"><span class="n">1</span><div><b>Housing head assembly</b> <span>· with ports</span></div></li>
-    <li data-num="2"><span class="n">2</span><div><b>Fitting</b> <span>· inlet / outlet union (25 mm BSP)</span></div></li>
+    <li data-num="2"><span class="n">2</span><div><b>Fitting</b> <span>· inlet / outlet (25 mm BSP)</span></div></li>
     <li data-num="3"><span class="n">3</span><div><b>Fitting seal</b> <span>/ stand-pipe</span></div></li>
     <li data-num="4"><span class="n">4</span><div><b>Filter housing bowl</b> <span>· 20 × 4.5″</span></div></li>
-    <li data-num="5"><span class="n">5</span><div><b>Filter cartridge</b> <span>· 3 stages, install in order</span></div></li>
+    <li data-num="5"><span class="n">5</span><div><b>Filter cartridge</b> <span>· 3 stages</span></div></li>
     <li data-num="6"><span class="n">6</span><div><b>O-ring</b> <span>/ housing seal</span></div></li>
-    <li data-num="7"><span class="n">7</span><div><b>Mounting bracket</b> <span>/ frame</span></div></li>
+    <li data-num="7"><span class="n">7</span><div><b>Frame / chassis</b></div></li>
     <li data-num="8"><span class="n">8</span><div><b>Pressure gauge</b> <span>× 3</span></div></li>
-    <li data-num="9"><span class="n">9</span><div><b>Stainless screw</b> <span>· fixings</span></div></li>
+    <li data-num="9"><span class="n">9</span><div><b>Stainless fixings</b></div></li>
   </ol>
   <p class="foot">Tap a part (or a row) to isolate it · proportional model from published specs.</p>
 </div>
 
+<div class="callout" id="callout"><button class="x" id="calloutX" title="Show all">×</button><div class="top"><div class="cn">1</div><div class="ct">Part</div></div><div class="cd">…</div></div>
+
 <div class="dock">
-  <div class="group">
-    <label>Explode</label>
-    <input id="explode" type="range" min="0" max="100" value="0">
-  </div>
+  <div class="group"><label>Explode</label><input id="explode" type="range" min="0" max="100" value="0"></div>
   <div class="sep"></div>
   <div class="group">
     <button class="btn" id="toggle">Explode ▸</button>
@@ -125,15 +99,8 @@
     <button class="btn ghost" id="reset">Reset view</button>
   </div>
 </div>
-<div class="callout" id="callout">
-  <button class="x" id="calloutX" title="Show all">×</button>
-  <div class="top"><div class="cn">1</div><div class="ct">Part</div></div>
-  <div class="cd">…</div>
-</div>
 <div class="hint">drag to orbit · scroll to zoom · tap a part to isolate</div>
-
 <div id="loader"><div class="spin"></div><p>Loading 3D model…</p></div>
-
 <script>
 (() => {
   // vendor/three.module.js
@@ -904,8 +871,8 @@
     }
     determinant() {
       const te = this.elements;
-      const a = te[0], b = te[1], c = te[2], d = te[3], e = te[4], f = te[5], g = te[6], h = te[7], i = te[8];
-      return a * e * i - a * f * h - b * d * i + b * f * g + c * d * h - c * e * g;
+      const a = te[0], b = te[1], c = te[2], d = te[3], e = te[4], f = te[5], g2 = te[6], h = te[7], i = te[8];
+      return a * e * i - a * f * h - b * d * i + b * f * g2 + c * d * h - c * e * g2;
     }
     invert() {
       const te = this.elements, n11 = te[0], n21 = te[1], n31 = te[2], n12 = te[3], n22 = te[4], n32 = te[5], n13 = te[6], n23 = te[7], n33 = te[8], t11 = n33 * n22 - n32 * n23, t12 = n32 * n13 - n33 * n12, t13 = n23 * n12 - n22 * n13, det = n11 * t11 + n21 * t12 + n31 * t13;
@@ -5311,15 +5278,15 @@
     return p;
   }
   var Color = class {
-    constructor(r, g, b) {
+    constructor(r, g2, b) {
       this.isColor = true;
       this.r = 1;
       this.g = 1;
       this.b = 1;
-      return this.set(r, g, b);
+      return this.set(r, g2, b);
     }
-    set(r, g, b) {
-      if (g === void 0 && b === void 0) {
+    set(r, g2, b) {
+      if (g2 === void 0 && b === void 0) {
         const value = r;
         if (value && value.isColor) {
           this.copy(value);
@@ -5329,7 +5296,7 @@
           this.setStyle(value);
         }
       } else {
-        this.setRGB(r, g, b);
+        this.setRGB(r, g2, b);
       }
       return this;
     }
@@ -5347,9 +5314,9 @@
       ColorManagement.toWorkingColorSpace(this, colorSpace);
       return this;
     }
-    setRGB(r, g, b, colorSpace = ColorManagement.workingColorSpace) {
+    setRGB(r, g2, b, colorSpace = ColorManagement.workingColorSpace) {
       this.r = r;
-      this.g = g;
+      this.g = g2;
       this.b = b;
       ColorManagement.toWorkingColorSpace(this, colorSpace);
       return this;
@@ -5486,9 +5453,9 @@
     }
     getHSL(target2, colorSpace = ColorManagement.workingColorSpace) {
       ColorManagement.fromWorkingColorSpace(_color.copy(this), colorSpace);
-      const r = _color.r, g = _color.g, b = _color.b;
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
+      const r = _color.r, g2 = _color.g, b = _color.b;
+      const max = Math.max(r, g2, b);
+      const min = Math.min(r, g2, b);
       let hue, saturation;
       const lightness = (min + max) / 2;
       if (min === max) {
@@ -5499,13 +5466,13 @@
         saturation = lightness <= 0.5 ? delta / (max + min) : delta / (2 - max - min);
         switch (max) {
           case r:
-            hue = (g - b) / delta + (g < b ? 6 : 0);
+            hue = (g2 - b) / delta + (g2 < b ? 6 : 0);
             break;
-          case g:
+          case g2:
             hue = (b - r) / delta + 2;
             break;
           case b:
-            hue = (r - g) / delta + 4;
+            hue = (r - g2) / delta + 4;
             break;
         }
         hue /= 6;
@@ -5524,11 +5491,11 @@
     }
     getStyle(colorSpace = SRGBColorSpace) {
       ColorManagement.fromWorkingColorSpace(_color.copy(this), colorSpace);
-      const r = _color.r, g = _color.g, b = _color.b;
+      const r = _color.r, g2 = _color.g, b = _color.b;
       if (colorSpace !== SRGBColorSpace) {
-        return `color(${colorSpace} ${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)})`;
+        return `color(${colorSpace} ${r.toFixed(3)} ${g2.toFixed(3)} ${b.toFixed(3)})`;
       }
-      return `rgb(${Math.round(r * 255)},${Math.round(g * 255)},${Math.round(b * 255)})`;
+      return `rgb(${Math.round(r * 255)},${Math.round(g2 * 255)},${Math.round(b * 255)})`;
     }
     offsetHSL(h, s, l) {
       this.getHSL(_hslA);
@@ -5598,11 +5565,11 @@
       return this;
     }
     applyMatrix3(m) {
-      const r = this.r, g = this.g, b = this.b;
+      const r = this.r, g2 = this.g, b = this.b;
       const e = m.elements;
-      this.r = e[0] * r + e[3] * g + e[6] * b;
-      this.g = e[1] * r + e[4] * g + e[7] * b;
-      this.b = e[2] * r + e[5] * g + e[8] * b;
+      this.r = e[0] * r + e[3] * g2 + e[6] * b;
+      this.g = e[1] * r + e[4] * g2 + e[7] * b;
+      this.b = e[2] * r + e[5] * g2 + e[8] * b;
       return this;
     }
     equals(c) {
@@ -7882,8 +7849,8 @@
     let isAnimating = false;
     let animationLoop = null;
     let requestId = null;
-    function onAnimationFrame(time, frame) {
-      animationLoop(time, frame);
+    function onAnimationFrame(time, frame2) {
+      animationLoop(time, frame2);
       requestId = context.requestAnimationFrame(onAnimationFrame);
     }
     return {
@@ -10751,30 +10718,30 @@
   function WebGLObjects(gl, geometries, attributes, info) {
     let updateMap = /* @__PURE__ */ new WeakMap();
     function update(object) {
-      const frame = info.render.frame;
+      const frame2 = info.render.frame;
       const geometry = object.geometry;
       const buffergeometry = geometries.get(object, geometry);
-      if (updateMap.get(buffergeometry) !== frame) {
+      if (updateMap.get(buffergeometry) !== frame2) {
         geometries.update(buffergeometry);
-        updateMap.set(buffergeometry, frame);
+        updateMap.set(buffergeometry, frame2);
       }
       if (object.isInstancedMesh) {
         if (object.hasEventListener("dispose", onInstancedMeshDispose) === false) {
           object.addEventListener("dispose", onInstancedMeshDispose);
         }
-        if (updateMap.get(object) !== frame) {
+        if (updateMap.get(object) !== frame2) {
           attributes.update(object.instanceMatrix, gl.ARRAY_BUFFER);
           if (object.instanceColor !== null) {
             attributes.update(object.instanceColor, gl.ARRAY_BUFFER);
           }
-          updateMap.set(object, frame);
+          updateMap.set(object, frame2);
         }
       }
       if (object.isSkinnedMesh) {
         const skeleton = object.skeleton;
-        if (updateMap.get(skeleton) !== frame) {
+        if (updateMap.get(skeleton) !== frame2) {
           skeleton.update();
-          updateMap.set(skeleton, frame);
+          updateMap.set(skeleton, frame2);
         }
       }
       return buffergeometry;
@@ -12940,7 +12907,7 @@
     const matrix4 = new Matrix4();
     const matrix42 = new Matrix4();
     function setup(lights, useLegacyLights) {
-      let r = 0, g = 0, b = 0;
+      let r = 0, g2 = 0, b = 0;
       for (let i = 0; i < 9; i++) state.probe[i].set(0, 0, 0);
       let directionalLength = 0;
       let pointLength = 0;
@@ -12963,7 +12930,7 @@
         const shadowMap = light.shadow && light.shadow.map ? light.shadow.map.texture : null;
         if (light.isAmbientLight) {
           r += color.r * intensity * scaleFactor;
-          g += color.g * intensity * scaleFactor;
+          g2 += color.g * intensity * scaleFactor;
           b += color.b * intensity * scaleFactor;
         } else if (light.isLightProbe) {
           for (let j = 0; j < 9; j++) {
@@ -13073,7 +13040,7 @@
         }
       }
       state.ambient[0] = r;
-      state.ambient[1] = g;
+      state.ambient[1] = g2;
       state.ambient[2] = b;
       const hash = state.hash;
       if (hash.directionalLength !== directionalLength || hash.pointLength !== pointLength || hash.spotLength !== spotLength || hash.rectAreaLength !== rectAreaLength || hash.hemiLength !== hemiLength || hash.numDirectionalShadows !== numDirectionalShadows || hash.numPointShadows !== numPointShadows || hash.numSpotShadows !== numSpotShadows || hash.numSpotMaps !== numSpotMaps || hash.numLightProbes !== numLightProbes) {
@@ -13513,18 +13480,18 @@
             currentColorMask = colorMask;
           }
         },
-        setLocked: function(lock) {
-          locked = lock;
+        setLocked: function(lock2) {
+          locked = lock2;
         },
-        setClear: function(r, g, b, a, premultipliedAlpha) {
+        setClear: function(r, g2, b, a, premultipliedAlpha) {
           if (premultipliedAlpha === true) {
             r *= a;
-            g *= a;
+            g2 *= a;
             b *= a;
           }
-          color.set(r, g, b, a);
+          color.set(r, g2, b, a);
           if (currentColorClear.equals(color) === false) {
-            gl.clearColor(r, g, b, a);
+            gl.clearColor(r, g2, b, a);
             currentColorClear.copy(color);
           }
         },
@@ -13587,8 +13554,8 @@
             currentDepthFunc = depthFunc;
           }
         },
-        setLocked: function(lock) {
-          locked = lock;
+        setLocked: function(lock2) {
+          locked = lock2;
         },
         setClear: function(depth) {
           if (currentDepthClear !== depth) {
@@ -13646,8 +13613,8 @@
             currentStencilZPass = stencilZPass;
           }
         },
-        setLocked: function(lock) {
-          locked = lock;
+        setLocked: function(lock2) {
+          locked = lock2;
         },
         setClear: function(stencil) {
           if (currentStencilClear !== stencil) {
@@ -15277,9 +15244,9 @@
       return isWebGL2 && renderTarget.samples > 0 && extensions.has("WEBGL_multisampled_render_to_texture") === true && renderTargetProperties.__useRenderToTexture !== false;
     }
     function updateVideoTexture(texture) {
-      const frame = info.render.frame;
-      if (_videoTextures.get(texture) !== frame) {
-        _videoTextures.set(texture, frame);
+      const frame2 = info.render.frame;
+      if (_videoTextures.get(texture) !== frame2) {
+        _videoTextures.set(texture, frame2);
         texture.update();
       }
     }
@@ -15563,18 +15530,18 @@
       }
       return this;
     }
-    update(inputSource, frame, referenceSpace) {
+    update(inputSource, frame2, referenceSpace) {
       let inputPose = null;
       let gripPose = null;
       let handPose = null;
       const targetRay = this._targetRay;
       const grip = this._grip;
       const hand = this._hand;
-      if (inputSource && frame.session.visibilityState !== "visible-blurred") {
+      if (inputSource && frame2.session.visibilityState !== "visible-blurred") {
         if (hand && inputSource.hand) {
           handPose = true;
           for (const inputjoint of inputSource.hand.values()) {
-            const jointPose = frame.getJointPose(inputjoint, referenceSpace);
+            const jointPose = frame2.getJointPose(inputjoint, referenceSpace);
             const joint = this._getHandJoint(hand, inputjoint);
             if (jointPose !== null) {
               joint.matrix.fromArray(jointPose.transform.matrix);
@@ -15606,7 +15573,7 @@
           }
         } else {
           if (grip !== null && inputSource.gripSpace) {
-            gripPose = frame.getPose(inputSource.gripSpace, referenceSpace);
+            gripPose = frame2.getPose(inputSource.gripSpace, referenceSpace);
             if (gripPose !== null) {
               grip.matrix.fromArray(gripPose.transform.matrix);
               grip.matrix.decompose(grip.position, grip.rotation, grip.scale);
@@ -15627,7 +15594,7 @@
           }
         }
         if (targetRay !== null) {
-          inputPose = frame.getPose(inputSource.targetRaySpace, referenceSpace);
+          inputPose = frame2.getPose(inputSource.targetRaySpace, referenceSpace);
           if (inputPose === null && gripPose !== null) {
             inputPose = gripPose;
           }
@@ -16026,9 +15993,9 @@
         }
       };
       let onAnimationFrameCallback = null;
-      function onAnimationFrame(time, frame) {
-        pose = frame.getViewerPose(customReferenceSpace || referenceSpace);
-        xrFrame = frame;
+      function onAnimationFrame(time, frame2) {
+        pose = frame2.getViewerPose(customReferenceSpace || referenceSpace);
+        xrFrame = frame2;
         if (pose !== null) {
           const views = pose.views;
           if (glBaseLayer !== null) {
@@ -16082,12 +16049,12 @@
           const inputSource = controllerInputSources[i];
           const controller = controllers[i];
           if (inputSource !== null && controller !== void 0) {
-            controller.update(inputSource, frame, customReferenceSpace || referenceSpace);
+            controller.update(inputSource, frame2, customReferenceSpace || referenceSpace);
           }
         }
-        if (onAnimationFrameCallback) onAnimationFrameCallback(time, frame);
-        if (frame.detectedPlanes) {
-          scope.dispatchEvent({ type: "planesdetected", data: frame });
+        if (onAnimationFrameCallback) onAnimationFrameCallback(time, frame2);
+        if (frame2.detectedPlanes) {
+          scope.dispatchEvent({ type: "planesdetected", data: frame2 });
         }
         xrFrame = null;
       }
@@ -16416,10 +16383,10 @@
       }
       const webglProgram = program.program;
       state.updateUBOMapping(uniformsGroup, webglProgram);
-      const frame = info.render.frame;
-      if (updateList[uniformsGroup.id] !== frame) {
+      const frame2 = info.render.frame;
+      if (updateList[uniformsGroup.id] !== frame2) {
         updateBufferData(uniformsGroup);
-        updateList[uniformsGroup.id] = frame;
+        updateList[uniformsGroup.id] = frame2;
       }
     }
     function createBuffer(uniformsGroup) {
@@ -16885,17 +16852,17 @@
             const clearColor = background.getClearColor();
             const a = background.getClearAlpha();
             const r = clearColor.r;
-            const g = clearColor.g;
+            const g2 = clearColor.g;
             const b = clearColor.b;
             if (isUnsignedType) {
               uintClearColor[0] = r;
-              uintClearColor[1] = g;
+              uintClearColor[1] = g2;
               uintClearColor[2] = b;
               uintClearColor[3] = a;
               _gl.clearBufferuiv(_gl.COLOR, 0, uintClearColor);
             } else {
               intClearColor[0] = r;
-              intClearColor[1] = g;
+              intClearColor[1] = g2;
               intClearColor[2] = b;
               intClearColor[3] = a;
               _gl.clearBufferiv(_gl.COLOR, 0, intClearColor);
@@ -17965,153 +17932,11 @@
       return data;
     }
   };
-  var LineBasicMaterial = class extends Material {
-    constructor(parameters) {
-      super();
-      this.isLineBasicMaterial = true;
-      this.type = "LineBasicMaterial";
-      this.color = new Color(16777215);
-      this.map = null;
-      this.linewidth = 1;
-      this.linecap = "round";
-      this.linejoin = "round";
-      this.fog = true;
-      this.setValues(parameters);
-    }
-    copy(source) {
-      super.copy(source);
-      this.color.copy(source.color);
-      this.map = source.map;
-      this.linewidth = source.linewidth;
-      this.linecap = source.linecap;
-      this.linejoin = source.linejoin;
-      this.fog = source.fog;
-      return this;
-    }
-  };
-  var _start$1 = /* @__PURE__ */ new Vector3();
-  var _end$1 = /* @__PURE__ */ new Vector3();
-  var _inverseMatrix$1 = /* @__PURE__ */ new Matrix4();
-  var _ray$1 = /* @__PURE__ */ new Ray();
-  var _sphere$1 = /* @__PURE__ */ new Sphere();
-  var Line = class extends Object3D {
-    constructor(geometry = new BufferGeometry(), material = new LineBasicMaterial()) {
-      super();
-      this.isLine = true;
-      this.type = "Line";
-      this.geometry = geometry;
-      this.material = material;
-      this.updateMorphTargets();
-    }
-    copy(source, recursive) {
-      super.copy(source, recursive);
-      this.material = Array.isArray(source.material) ? source.material.slice() : source.material;
-      this.geometry = source.geometry;
-      return this;
-    }
-    computeLineDistances() {
-      const geometry = this.geometry;
-      if (geometry.index === null) {
-        const positionAttribute = geometry.attributes.position;
-        const lineDistances = [0];
-        for (let i = 1, l = positionAttribute.count; i < l; i++) {
-          _start$1.fromBufferAttribute(positionAttribute, i - 1);
-          _end$1.fromBufferAttribute(positionAttribute, i);
-          lineDistances[i] = lineDistances[i - 1];
-          lineDistances[i] += _start$1.distanceTo(_end$1);
-        }
-        geometry.setAttribute("lineDistance", new Float32BufferAttribute(lineDistances, 1));
-      } else {
-        console.warn("THREE.Line.computeLineDistances(): Computation only possible with non-indexed BufferGeometry.");
-      }
-      return this;
-    }
-    raycast(raycaster, intersects) {
-      const geometry = this.geometry;
-      const matrixWorld = this.matrixWorld;
-      const threshold = raycaster.params.Line.threshold;
-      const drawRange = geometry.drawRange;
-      if (geometry.boundingSphere === null) geometry.computeBoundingSphere();
-      _sphere$1.copy(geometry.boundingSphere);
-      _sphere$1.applyMatrix4(matrixWorld);
-      _sphere$1.radius += threshold;
-      if (raycaster.ray.intersectsSphere(_sphere$1) === false) return;
-      _inverseMatrix$1.copy(matrixWorld).invert();
-      _ray$1.copy(raycaster.ray).applyMatrix4(_inverseMatrix$1);
-      const localThreshold = threshold / ((this.scale.x + this.scale.y + this.scale.z) / 3);
-      const localThresholdSq = localThreshold * localThreshold;
-      const vStart = new Vector3();
-      const vEnd = new Vector3();
-      const interSegment = new Vector3();
-      const interRay = new Vector3();
-      const step = this.isLineSegments ? 2 : 1;
-      const index = geometry.index;
-      const attributes = geometry.attributes;
-      const positionAttribute = attributes.position;
-      if (index !== null) {
-        const start = Math.max(0, drawRange.start);
-        const end = Math.min(index.count, drawRange.start + drawRange.count);
-        for (let i = start, l = end - 1; i < l; i += step) {
-          const a = index.getX(i);
-          const b = index.getX(i + 1);
-          vStart.fromBufferAttribute(positionAttribute, a);
-          vEnd.fromBufferAttribute(positionAttribute, b);
-          const distSq = _ray$1.distanceSqToSegment(vStart, vEnd, interRay, interSegment);
-          if (distSq > localThresholdSq) continue;
-          interRay.applyMatrix4(this.matrixWorld);
-          const distance = raycaster.ray.origin.distanceTo(interRay);
-          if (distance < raycaster.near || distance > raycaster.far) continue;
-          intersects.push({
-            distance,
-            // What do we want? intersection point on the ray or on the segment??
-            // point: raycaster.ray.at( distance ),
-            point: interSegment.clone().applyMatrix4(this.matrixWorld),
-            index: i,
-            face: null,
-            faceIndex: null,
-            object: this
-          });
-        }
-      } else {
-        const start = Math.max(0, drawRange.start);
-        const end = Math.min(positionAttribute.count, drawRange.start + drawRange.count);
-        for (let i = start, l = end - 1; i < l; i += step) {
-          vStart.fromBufferAttribute(positionAttribute, i);
-          vEnd.fromBufferAttribute(positionAttribute, i + 1);
-          const distSq = _ray$1.distanceSqToSegment(vStart, vEnd, interRay, interSegment);
-          if (distSq > localThresholdSq) continue;
-          interRay.applyMatrix4(this.matrixWorld);
-          const distance = raycaster.ray.origin.distanceTo(interRay);
-          if (distance < raycaster.near || distance > raycaster.far) continue;
-          intersects.push({
-            distance,
-            // What do we want? intersection point on the ray or on the segment??
-            // point: raycaster.ray.at( distance ),
-            point: interSegment.clone().applyMatrix4(this.matrixWorld),
-            index: i,
-            face: null,
-            faceIndex: null,
-            object: this
-          });
-        }
-      }
-    }
-    updateMorphTargets() {
-      const geometry = this.geometry;
-      const morphAttributes = geometry.morphAttributes;
-      const keys = Object.keys(morphAttributes);
-      if (keys.length > 0) {
-        const morphAttribute = morphAttributes[keys[0]];
-        if (morphAttribute !== void 0) {
-          this.morphTargetInfluences = [];
-          this.morphTargetDictionary = {};
-          for (let m = 0, ml = morphAttribute.length; m < ml; m++) {
-            const name = morphAttribute[m].name || String(m);
-            this.morphTargetInfluences.push(0);
-            this.morphTargetDictionary[name] = m;
-          }
-        }
-      }
+  var CanvasTexture = class extends Texture {
+    constructor(canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy) {
+      super(canvas, mapping, wrapS, wrapT, magFilter, minFilter, format, type, anisotropy);
+      this.isCanvasTexture = true;
+      this.needsUpdate = true;
     }
   };
   var CircleGeometry = class _CircleGeometry extends BufferGeometry {
@@ -18434,24 +18259,6 @@
       this.wireframeLinejoin = source.wireframeLinejoin;
       this.flatShading = source.flatShading;
       this.fog = source.fog;
-      return this;
-    }
-  };
-  var LineDashedMaterial = class extends LineBasicMaterial {
-    constructor(parameters) {
-      super();
-      this.isLineDashedMaterial = true;
-      this.type = "LineDashedMaterial";
-      this.scale = 1;
-      this.dashSize = 3;
-      this.gapSize = 1;
-      this.setValues(parameters);
-    }
-    copy(source) {
-      super.copy(source);
-      this.scale = source.scale;
-      this.dashSize = source.dashSize;
-      this.gapSize = source.gapSize;
       return this;
     }
   };
@@ -20710,10 +20517,98 @@
     return material;
   }
 
-  // entry.js
+  // vendor/addons/geometries/RoundedBoxGeometry.js
+  var _tempNormal = new Vector3();
+  function getUv(faceDirVector, normal, uvAxis, projectionAxis, radius, sideLength) {
+    const totArcLength = 2 * Math.PI * radius / 4;
+    const centerLength = Math.max(sideLength - 2 * radius, 0);
+    const halfArc = Math.PI / 4;
+    _tempNormal.copy(normal);
+    _tempNormal[projectionAxis] = 0;
+    _tempNormal.normalize();
+    const arcUvRatio = 0.5 * totArcLength / (totArcLength + centerLength);
+    const arcAngleRatio = 1 - _tempNormal.angleTo(faceDirVector) / halfArc;
+    if (Math.sign(_tempNormal[uvAxis]) === 1) {
+      return arcAngleRatio * arcUvRatio;
+    } else {
+      const lenUv = centerLength / (totArcLength + centerLength);
+      return lenUv + arcUvRatio + arcUvRatio * (1 - arcAngleRatio);
+    }
+  }
+  var RoundedBoxGeometry = class extends BoxGeometry {
+    constructor(width = 1, height = 1, depth = 1, segments = 2, radius = 0.1) {
+      segments = segments * 2 + 1;
+      radius = Math.min(width / 2, height / 2, depth / 2, radius);
+      super(1, 1, 1, segments, segments, segments);
+      if (segments === 1) return;
+      const geometry2 = this.toNonIndexed();
+      this.index = null;
+      this.attributes.position = geometry2.attributes.position;
+      this.attributes.normal = geometry2.attributes.normal;
+      this.attributes.uv = geometry2.attributes.uv;
+      const position = new Vector3();
+      const normal = new Vector3();
+      const box2 = new Vector3(width, height, depth).divideScalar(2).subScalar(radius);
+      const positions = this.attributes.position.array;
+      const normals = this.attributes.normal.array;
+      const uvs = this.attributes.uv.array;
+      const faceTris = positions.length / 6;
+      const faceDirVector = new Vector3();
+      const halfSegmentSize = 0.5 / segments;
+      for (let i = 0, j = 0; i < positions.length; i += 3, j += 2) {
+        position.fromArray(positions, i);
+        normal.copy(position);
+        normal.x -= Math.sign(normal.x) * halfSegmentSize;
+        normal.y -= Math.sign(normal.y) * halfSegmentSize;
+        normal.z -= Math.sign(normal.z) * halfSegmentSize;
+        normal.normalize();
+        positions[i + 0] = box2.x * Math.sign(position.x) + normal.x * radius;
+        positions[i + 1] = box2.y * Math.sign(position.y) + normal.y * radius;
+        positions[i + 2] = box2.z * Math.sign(position.z) + normal.z * radius;
+        normals[i + 0] = normal.x;
+        normals[i + 1] = normal.y;
+        normals[i + 2] = normal.z;
+        const side = Math.floor(i / faceTris);
+        switch (side) {
+          case 0:
+            faceDirVector.set(1, 0, 0);
+            uvs[j + 0] = getUv(faceDirVector, normal, "z", "y", radius, depth);
+            uvs[j + 1] = 1 - getUv(faceDirVector, normal, "y", "z", radius, height);
+            break;
+          case 1:
+            faceDirVector.set(-1, 0, 0);
+            uvs[j + 0] = 1 - getUv(faceDirVector, normal, "z", "y", radius, depth);
+            uvs[j + 1] = 1 - getUv(faceDirVector, normal, "y", "z", radius, height);
+            break;
+          case 2:
+            faceDirVector.set(0, 1, 0);
+            uvs[j + 0] = 1 - getUv(faceDirVector, normal, "x", "z", radius, width);
+            uvs[j + 1] = getUv(faceDirVector, normal, "z", "x", radius, depth);
+            break;
+          case 3:
+            faceDirVector.set(0, -1, 0);
+            uvs[j + 0] = 1 - getUv(faceDirVector, normal, "x", "z", radius, width);
+            uvs[j + 1] = 1 - getUv(faceDirVector, normal, "z", "x", radius, depth);
+            break;
+          case 4:
+            faceDirVector.set(0, 0, 1);
+            uvs[j + 0] = 1 - getUv(faceDirVector, normal, "x", "y", radius, width);
+            uvs[j + 1] = 1 - getUv(faceDirVector, normal, "y", "x", radius, height);
+            break;
+          case 5:
+            faceDirVector.set(0, 0, -1);
+            uvs[j + 0] = getUv(faceDirVector, normal, "x", "y", radius, width);
+            uvs[j + 1] = 1 - getUv(faceDirVector, normal, "y", "x", radius, height);
+            break;
+        }
+      }
+    }
+  };
+
+  // src/app.js
   var app = document.getElementById("app");
   var scene = new Scene();
-  scene.background = new Color(13223096);
+  scene.background = new Color(15197146);
   var renderer = new WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
@@ -20730,60 +20625,56 @@
   app.appendChild(labelRenderer.domElement);
   var pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  var camera = new PerspectiveCamera(42, innerWidth / innerHeight, 0.1, 4e3);
-  camera.position.set(95, 78, 135);
+  var camera = new PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 5e3);
+  camera.position.set(78, 70, 150);
   var controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.dampingFactor = 0.08;
-  controls.target.set(0, 34, 0);
-  controls.minDistance = 50;
-  controls.maxDistance = 320;
+  controls.target.set(0, 42, 0);
+  controls.minDistance = 55;
+  controls.maxDistance = 420;
   controls.maxPolarAngle = Math.PI * 0.92;
-  var key = new DirectionalLight(16777215, 1.5);
-  key.position.set(60, 120, 80);
+  var key = new DirectionalLight(16777215, 1.7);
+  key.position.set(55, 130, 95);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.camera.near = 10;
-  key.shadow.camera.far = 400;
+  key.shadow.camera.far = 500;
   key.shadow.camera.left = -90;
   key.shadow.camera.right = 90;
-  key.shadow.camera.top = 120;
-  key.shadow.camera.bottom = -20;
+  key.shadow.camera.top = 130;
+  key.shadow.camera.bottom = -30;
   key.shadow.bias = -4e-4;
   scene.add(key);
-  scene.add(new DirectionalLight(16774112, 0.35).position?.set?.(-80, 40, -60) || new Object3D());
-  var fill = new DirectionalLight(13623551, 0.4);
-  fill.position.set(-70, 50, -40);
+  var fill = new DirectionalLight(13623551, 0.45);
+  fill.position.set(-80, 55, -30);
   scene.add(fill);
-  scene.add(new HemisphereLight(16777215, 7038039, 0.5));
-  var ground = new Mesh(
-    new CircleGeometry(160, 64),
-    new ShadowMaterial({ opacity: 0.22 })
-  );
+  scene.add(new HemisphereLight(16777215, 7367002, 0.55));
+  var ground = new Mesh(new CircleGeometry(180, 64), new ShadowMaterial({ opacity: 0.2 }));
   ground.rotation.x = -Math.PI / 2;
-  ground.position.y = 0;
   ground.receiveShadow = true;
   scene.add(ground);
   var M = {
-    steel: new MeshStandardMaterial({ color: 12896458, metalness: 0.95, roughness: 0.28 }),
-    steelDk: new MeshStandardMaterial({ color: 7171952, metalness: 0.9, roughness: 0.35 }),
-    ink: new MeshStandardMaterial({ color: 2301984, metalness: 0.55, roughness: 0.45 }),
-    brass: new MeshStandardMaterial({ color: 12094014, metalness: 1, roughness: 0.32 }),
-    rubber: new MeshStandardMaterial({ color: 1315086, metalness: 0.1, roughness: 0.85 }),
-    glass: new MeshStandardMaterial({ color: 16777215, metalness: 0.9, roughness: 0.5, transparent: true, opacity: 0.9 }),
+    cover: new MeshStandardMaterial({ color: 15987436, metalness: 0.05, roughness: 0.38 }),
+    frame: new MeshStandardMaterial({ color: 2894894, metalness: 0.3, roughness: 0.55 }),
+    frameDk: new MeshStandardMaterial({ color: 2105378, metalness: 0.35, roughness: 0.5 }),
+    housing: new MeshStandardMaterial({ color: 16053230, metalness: 0, roughness: 0.5 }),
+    cap: new MeshStandardMaterial({ color: 15329247, metalness: 0.05, roughness: 0.55 }),
+    chrome: new MeshStandardMaterial({ color: 14277597, metalness: 1, roughness: 0.16 }),
+    gFace: new MeshStandardMaterial({ color: 16316143, metalness: 0, roughness: 0.5 }),
+    red: new MeshStandardMaterial({ color: 12597547, metalness: 0.1, roughness: 0.5 }),
+    brass: new MeshStandardMaterial({ color: 12094014, metalness: 1, roughness: 0.3 }),
+    rubber: new MeshStandardMaterial({ color: 1446672, metalness: 0.1, roughness: 0.85 }),
+    ink: new MeshStandardMaterial({ color: 2301984, metalness: 0.4, roughness: 0.5 }),
     cart1: new MeshStandardMaterial({ color: 15525074, metalness: 0, roughness: 0.85 }),
-    // pleated sediment (cream)
     cart2: new MeshStandardMaterial({ color: 10130826, metalness: 0.05, roughness: 0.8 }),
-    // grooved GPSS (grey)
-    cart3: new MeshStandardMaterial({ color: 3486254, metalness: 0.1, roughness: 0.7 }),
-    // carbon (charcoal)
-    gaugeFace: new MeshStandardMaterial({ color: 16250350, metalness: 0, roughness: 0.6 }),
-    white: new MeshStandardMaterial({ color: 15921127, metalness: 0.2, roughness: 0.6 })
+    cart3: new MeshStandardMaterial({ color: 3486254, metalness: 0.1, roughness: 0.7 })
   };
   var root = new Group();
   scene.add(root);
   var parts = [];
   var allMeshes = [];
+  var labels = [];
   function reg(obj, dir, dist, num) {
     obj.traverse((o) => {
       if (o.isMesh) {
@@ -20802,167 +20693,195 @@
     parts.push({ obj, dir: new Vector3(dir[0], dir[1], dir[2]).normalize(), dist, num });
     return obj;
   }
-  function cyl(r1, r2, h, mat, seg = 48) {
-    return new Mesh(new CylinderGeometry(r1, r2, h, seg), mat);
-  }
   function box(w, h, d, mat) {
     return new Mesh(new BoxGeometry(w, h, d), mat);
   }
-  function torus(r, t, mat) {
-    return new Mesh(new TorusGeometry(r, t, 16, 40), mat);
+  function cyl(r1, r2, h, mat, s = 48) {
+    return new Mesh(new CylinderGeometry(r1, r2, h, s), mat);
   }
-  function addLabel(num, text, anchor) {
+  function torus(r, t, mat) {
+    return new Mesh(new TorusGeometry(r, t, 16, 48), mat);
+  }
+  function rbox(w, h, d, r, mat) {
+    return new Mesh(new RoundedBoxGeometry(w, h, d, 5, r), mat);
+  }
+  function addLabel(num, text, v, parent) {
     const el = document.createElement("div");
     el.className = "plabel";
     el.innerHTML = `<span class="pn">${num}</span>${text}`;
     const o = new CSS2DObject(el);
-    o.position.copy(anchor);
-    o.userData.el = el;
+    o.position.copy(v);
     labels.push(o);
+    (parent || root).add(o);
     return o;
   }
-  var labels = [];
-  var SP = 19.8;
-  var xs = [-SP, 0, SP];
-  var bowlR = 6.4;
-  var bowlH = 50;
-  var capR = 7.2;
-  var capH = 8;
-  var cartR = 5.4;
-  var cartH = 46;
-  var baseY = 6;
-  var cartMats = [M.cart1, M.cart2, M.cart3];
-  var bracket = new Group();
-  var backPlate = box(SP * 2 + 18, 64, 2.4, M.steelDk);
-  backPlate.position.set(0, 38, -9.5);
-  bracket.add(backPlate);
-  [-1, 1].forEach((s) => {
-    const rail = box(3, 66, 4, M.steel);
-    rail.position.set(s * (SP + 7), 38, -8);
-    bracket.add(rail);
-  });
-  [6, 70].forEach((y) => {
-    const c = box(SP * 2 + 14, 3, 4, M.steel);
-    c.position.set(0, y, -8);
-    bracket.add(c);
-  });
-  root.add(reg(bracket, [0, 0, -1], 26, 7));
-  bracket.add(addLabel(7, "Mounting bracket / frame", new Vector3(-(SP + 9), 58, -8)));
-  var manifold = new Group();
-  var bar = box(SP * 2 + 16, 6, 11, M.ink);
-  bar.position.set(0, baseY + bowlH + capH + 2, 0);
-  manifold.add(bar);
-  root.add(reg(manifold, [0, 1, 0], 30, 1));
-  xs.forEach((x, i) => {
-    const topOfBowl = baseY + bowlH;
-    const bowl = new Group();
-    const wall = cyl(bowlR, bowlR, bowlH, M.steel);
-    wall.position.set(x, baseY + bowlH / 2, 0);
-    const bottom = cyl(bowlR, bowlR * 0.86, 3.4, M.steel);
-    bottom.position.set(x, baseY - 1.4, 0);
-    const rib = torus(bowlR - 0.1, 0.5, M.steelDk);
-    rib.rotation.x = Math.PI / 2;
-    rib.position.set(x, baseY + 8, 0);
-    bowl.add(wall, bottom, rib);
-    root.add(reg(bowl, [0, -1, 0], 24, 4));
-    const cart = new Group();
-    const core = cyl(cartR, cartR, cartH, cartMats[i]);
-    core.position.set(x, baseY + 2 + cartH / 2, 0);
-    for (let k = 0; k < 7; k++) {
-      const r = torus(cartR + 0.05, 0.18, M.steelDk);
-      r.rotation.x = Math.PI / 2;
-      r.position.set(x, baseY + 6 + k * 6, 0);
-      r.material = cartMats[i];
-      cart.add(r);
-    }
-    const capTop = cyl(cartR * 0.7, cartR * 0.7, 1.6, M.white);
-    capTop.position.set(x, baseY + 2 + cartH + 0.8, 0);
-    const capBot = cyl(cartR * 0.7, cartR * 0.7, 1.6, M.white);
-    capBot.position.set(x, baseY + 1.2, 0);
-    cart.add(core, capTop, capBot);
-    root.add(reg(cart, [0, -1, 0], 8, 5));
-    const oring = torus(bowlR - 0.3, 0.55, M.rubber);
-    oring.rotation.x = Math.PI / 2;
-    oring.position.set(x, topOfBowl, 0);
-    root.add(reg(oring, [0, 1, 0], 13, 6));
-    const head = new Group();
-    const hc = cyl(capR, capR, capH, M.steelDk);
-    hc.position.set(x, topOfBowl + capH / 2, 0);
-    const collar = cyl(bowlR + 0.4, bowlR + 0.4, 2.2, M.steel);
-    collar.position.set(x, topOfBowl + 0.6, 0);
-    const portL = cyl(1.5, 1.5, 5, M.brass);
-    portL.rotation.z = Math.PI / 2;
-    portL.position.set(x - capR - 1.5, topOfBowl + capH * 0.55, 2.2);
-    const portR = cyl(1.5, 1.5, 5, M.brass);
-    portR.rotation.z = Math.PI / 2;
-    portR.position.set(x + capR + 1.5, topOfBowl + capH * 0.55, 2.2);
-    head.add(hc, collar, portL, portR);
-    root.add(reg(head, [0, 1, 0], 17, 1));
-    const fit = new Group();
-    const fitBody = cyl(1.5, 1.8, 5.5, M.brass);
-    fitBody.rotation.x = Math.PI / 2;
-    fitBody.position.set(x, topOfBowl + capH * 0.5, capR + 3);
-    const nut = cyl(2.1, 2.1, 1.6, M.brass, 6);
-    nut.rotation.x = Math.PI / 2;
-    nut.position.set(x, topOfBowl + capH * 0.5, capR + 1.4);
-    fit.add(fitBody, nut);
-    root.add(reg(fit, [0, 0, 1], 14, 2));
-    const seal = torus(1.5, 0.45, M.rubber);
-    seal.position.set(x, topOfBowl + capH * 0.5, capR + 0.6);
-    root.add(reg(seal, [0, 0, 1], 8, 3));
-    const gauge = new Group();
-    const stem = cyl(0.8, 0.8, 2.6, M.brass);
-    stem.position.set(x, topOfBowl + capH + 1.3, 0);
-    const body = cyl(2.2, 2.2, 1.8, M.ink);
-    body.position.set(x, topOfBowl + capH + 3.1, 0);
-    const face = cyl(1.9, 1.9, 0.4, M.gaugeFace);
-    face.position.set(x, topOfBowl + capH + 4.05, 0);
-    const needle = box(1.4, 0.18, 0.18, M.ink);
-    needle.position.set(x + 0.4, topOfBowl + capH + 4.28, 0);
-    needle.rotation.z = 0.6;
-    gauge.add(stem, body, face, needle);
-    root.add(reg(gauge, [0, 1, 0], 24, 8));
-    const screws = new Group();
-    [[-capR - 1, 8], [capR + 1, 8], [-capR - 1, topOfBowl - 4], [capR + 1, topOfBowl - 4]].forEach(([dx, yy]) => {
-      const s = cyl(0.6, 0.6, 1.4, M.steel);
-      s.rotation.x = Math.PI / 2;
-      s.position.set(x + dx, yy, -7.2);
-      screws.add(s);
-    });
-    root.add(reg(screws, [0, 0, -1], 20, 9));
-    if (i === 1) {
-      head.add(addLabel(1, "Head assembly", new Vector3(x, topOfBowl + capH + 0.5, 0)));
-      fit.add(addLabel(2, "Inlet / outlet fitting", new Vector3(x, topOfBowl + capH * 0.5, capR + 3)));
-      seal.add(addLabel(3, "Fitting seal", new Vector3(x, topOfBowl + capH * 0.5, capR + 0.6)));
-      bowl.add(addLabel(4, "Housing bowl", new Vector3(x, baseY + bowlH * 0.4, 0)));
-      cart.add(addLabel(5, "Cartridge \xD73", new Vector3(x, baseY + 2 + cartH * 0.5, 0)));
-      oring.add(addLabel(6, "O-ring", new Vector3(x, topOfBowl, 0)));
-      gauge.add(addLabel(8, "Pressure gauge", new Vector3(x, topOfBowl + capH + 3.1, 0)));
-      screws.add(addLabel(9, "Fixings", new Vector3(x + capR + 1, 8, -7.2)));
-    }
-  });
+  var W = 59.5;
+  var H = 75.2;
+  var D = 21.2;
+  var xs = [-19, 0, 19];
+  var cartMats = [M.cart3, M.cart2, M.cart1];
+  var at = (m, x, y, z) => {
+    m.position.set(x, y, z);
+    return m;
+  };
+  var frame = new Group();
+  frame.add(at(box(W, 1.2, D, M.frame), 0, H - 0.6, 0));
+  frame.add(at(box(W, 1.4, D, M.frame), 0, 0.7, 0));
+  frame.add(at(box(1.2, H, D, M.frame), -W / 2 + 0.6, H / 2, 0));
+  frame.add(at(box(1.2, H, D, M.frame), W / 2 - 0.6, H / 2, 0));
+  frame.add(at(box(W, H, 1, M.frameDk), 0, H / 2, -D / 2 + 0.5));
+  root.add(reg(frame, [0, 0, -1], 0, 7));
   var feet = new Group();
-  [-SP - 4, SP + 4].forEach((x) => {
-    const f = box(6, 3, 12, M.ink);
-    f.position.set(x, 1.5, -3);
+  [[-W / 2 + 5, 7], [W / 2 - 5, 7], [-W / 2 + 5, -6], [W / 2 - 5, -6]].forEach(([x, z]) => {
+    const f = box(5, 1.8, 4, M.frameDk);
+    f.position.set(x, -0.9, z * 0.6);
     feet.add(f);
   });
-  var railBottom = box(SP * 2 + 14, 2.4, 6, M.steelDk);
-  railBottom.position.set(0, 1.2, -3);
-  feet.add(railBottom);
-  root.add(reg(feet, [0, -1, 0], 5, 7));
-  var guideMat = new LineDashedMaterial({ color: 1709842, dashSize: 1.4, gapSize: 1.2, transparent: true, opacity: 0.28 });
-  var guides = [];
-  xs.forEach((x) => {
-    const g = new BufferGeometry().setFromPoints([new Vector3(x, -2, 0), new Vector3(x, 120, 0)]);
-    const l = new Line(g, guideMat.clone());
-    l.computeLineDistances();
-    l.visible = false;
-    guides.push(l);
-    scene.add(l);
+  root.add(reg(feet, [0, -1, 0], 4, 7));
+  var head = new Group();
+  var bar = box(W - 3, 7, D - 3, M.ink);
+  bar.position.set(0, H - 8, 0);
+  head.add(bar);
+  var plate = box(W - 3, 1.3, D - 3.6, M.chrome);
+  plate.position.set(0, H - 4.6, 0);
+  head.add(plate);
+  var lip = box(W - 3, 1.4, D - 3, M.frameDk);
+  lip.position.set(0, H - 11.5, 0);
+  head.add(lip);
+  [-15.5, 15.5].forEach((kx) => {
+    const kh = cyl(0.85, 0.85, 1.4, M.frameDk, 20);
+    kh.position.set(kx, H - 4, -D * 0.05);
+    head.add(kh);
   });
-  var bbox = new Box3().setFromObject(root);
-  var ctr = bbox.getCenter(new Vector3());
+  root.add(reg(head, [0, 1, 0], 13, 1));
+  var gauges = new Group();
+  xs.forEach((x) => {
+    const bezel = cyl(2.5, 2.5, 1, M.chrome, 40);
+    bezel.position.set(x, H - 3.9, D * 0.18);
+    const face = cyl(2, 2, 0.5, M.gFace, 40);
+    face.position.set(x, H - 3.5, D * 0.18);
+    const needle = box(1.6, 0.18, 0.18, M.ink);
+    needle.position.set(x + 0.3, H - 3.25, D * 0.18);
+    needle.rotation.z = 0.7;
+    const stem = cyl(0.7, 0.7, 1.6, M.chrome);
+    stem.position.set(x, H - 5, D * 0.18);
+    gauges.add(bezel, face, needle, stem);
+  });
+  root.add(reg(gauges, [0, 1, 0], 20, 8));
+  var reds = new Group();
+  [-9.5, 9.5, 0].forEach((x) => {
+    const b = cyl(0.7, 0.7, 1, M.red);
+    b.position.set(x, H - 4.4, -D * 0.1);
+    reds.add(b);
+  });
+  root.add(reg(reds, [0, 1, 0], 15, 1));
+  var bowlR = 6.3;
+  var capH = 4.2;
+  var sumpTop = H - 13;
+  var sumpBot = 4;
+  var sumpH = sumpTop - sumpBot;
+  xs.forEach((x, i) => {
+    const cap = new Group();
+    const capBody = cyl(bowlR + 0.5, bowlR + 0.5, capH, M.cap);
+    capBody.position.set(x, sumpTop + capH / 2, 0);
+    const capRib = torus(bowlR + 0.55, 0.35, M.cap);
+    capRib.rotation.x = Math.PI / 2;
+    capRib.position.set(x, sumpTop + capH - 0.6, 0);
+    cap.add(capBody, capRib);
+    for (let r = 0; r < 3; r++) {
+      const tr = torus(bowlR + 0.08, 0.16, M.frameDk);
+      tr.rotation.x = Math.PI / 2;
+      tr.position.set(x, sumpTop + 0.5 + r * 0.85, 0);
+      cap.add(tr);
+    }
+    root.add(reg(cap, [0, 1, 0], 9, 1));
+    const bowl = new Group();
+    const sump = cyl(bowlR, bowlR, sumpH, M.housing);
+    sump.position.set(x, sumpBot + sumpH / 2, 0);
+    const round = cyl(bowlR, bowlR * 0.8, 2.2, M.housing);
+    round.position.set(x, sumpBot + 0.4, 0);
+    bowl.add(sump, round);
+    for (let k = 0; k < 18; k++) {
+      const a = k / 18 * Math.PI * 2;
+      const fl = box(0.7, sumpH * 0.34, 0.7, M.housing);
+      fl.position.set(x + Math.cos(a) * bowlR, sumpTop - 2 - sumpH * 0.17, Math.sin(a) * bowlR);
+      bowl.add(fl);
+    }
+    root.add(reg(bowl, [0, -1, 0.06], 9, 4));
+    const cart = new Group();
+    const core = cyl(4.6, 4.6, sumpH - 4, cartMats[i]);
+    core.position.set(x, sumpBot + 2 + (sumpH - 4) / 2, 0);
+    for (let k = 0; k < 8; k++) {
+      const r = torus(4.65, 0.16, cartMats[i]);
+      r.rotation.x = Math.PI / 2;
+      r.position.set(x, sumpBot + 4 + k * ((sumpH - 8) / 7), 0);
+      cart.add(r);
+    }
+    cart.add(core);
+    root.add(reg(cart, [0, -1, 0.1], 24, 5));
+    const o = torus(bowlR - 0.2, 0.5, M.rubber);
+    o.rotation.x = Math.PI / 2;
+    o.position.set(x, sumpTop + 0.2, 0);
+    root.add(reg(o, [0, 1, 0], 13, 6));
+    const fit = new Group();
+    const fb = cyl(1.3, 1.6, 4.5, M.brass);
+    fb.rotation.x = Math.PI / 2;
+    fb.position.set(x, H - 8, D / 2 - 1);
+    const nut = cyl(1.9, 1.9, 1.4, M.brass, 6);
+    nut.rotation.x = Math.PI / 2;
+    nut.position.set(x, H - 8, D / 2 - 3.2);
+    fit.add(fb, nut);
+    root.add(reg(fit, [0, 0, 1], 13, 2));
+    const seal = torus(1.3, 0.4, M.rubber);
+    seal.position.set(x, H - 8, D / 2 - 4.2);
+    root.add(reg(seal, [0, 0, 1], 8, 3));
+    const lbl = ["3rd", "2nd", "1st"][i];
+    const tag = document.createElement("div");
+    tag.className = "stage";
+    tag.textContent = lbl + " stage";
+    const so = new CSS2DObject(tag);
+    so.position.set(x, sumpTop - 1.5, bowlR);
+    bowl.add(so);
+    labels.push(so);
+  });
+  var cover = new Group();
+  var panel = rbox(W + 0.8, H + 0.2, 4.6, 2.6, M.cover);
+  panel.position.set(0, H / 2 - 1.2, D / 2 + 0.7);
+  var hood = cyl(3.5, 3.5, W + 0.8, M.cover, 32);
+  hood.rotation.z = Math.PI / 2;
+  hood.position.set(0, H - 1.4, D / 2 + 1.6);
+  var hoodTop = box(W + 0.8, 3.5, 4, M.cover);
+  hoodTop.position.set(0, H - 1.4, D / 2 - 0.4);
+  cover.add(panel, hood, hoodTop);
+  var lc = document.createElement("canvas");
+  lc.width = 300;
+  lc.height = 120;
+  var g = lc.getContext("2d");
+  g.fillStyle = "#23211d";
+  g.font = "800 78px Figtree, Arial, sans-serif";
+  g.textBaseline = "middle";
+  g.fillText("WFD", 10, 66);
+  var logoTex = new CanvasTexture(lc);
+  logoTex.anisotropy = 8;
+  var logo = new Mesh(new PlaneGeometry(9, 3.6), new MeshBasicMaterial({ map: logoTex, transparent: true }));
+  logo.position.set(W / 2 - 9, H - 8, D / 2 + 3.15);
+  cover.add(logo);
+  var lock = box(0.8, 7, 0.6, M.frameDk);
+  lock.position.set(W / 2 - 2.5, H / 2 - 4, D / 2 + 3.05);
+  cover.add(lock);
+  var lockBtn = cyl(0.6, 0.6, 0.5, M.chrome);
+  lockBtn.rotation.x = Math.PI / 2;
+  lockBtn.position.set(W / 2 - 2.5, H / 2 + 2, D / 2 + 3.25);
+  cover.add(lockBtn);
+  root.add(reg(cover, [0, 1, 0.06], 90, 10));
+  addLabel(10, "Front cover", new Vector3(0, H - 7, D / 2 + 3), cover);
+  addLabel(1, "Head assembly", new Vector3(0, H - 8, 0), head);
+  addLabel(8, "Pressure gauge", new Vector3(0, H - 3.9, D * 0.18), gauges);
+  addLabel(4, "Housing bowl", new Vector3(0, sumpBot + sumpH * 0.45, bowlR), root);
+  addLabel(5, "Cartridge \xD73", new Vector3(0, sumpBot + sumpH * 0.5, 0), root);
+  addLabel(7, "Frame / chassis", new Vector3(-W / 2 + 0.6, H * 0.5, D / 2), frame);
+  var bb = new Box3().setFromObject(root);
+  var ctr = bb.getCenter(new Vector3());
   controls.target.set(0, ctr.y, 0);
   var target = 0;
   var current = 0;
@@ -20972,15 +20891,85 @@
       tmp.copy(p.dir).multiplyScalar(p.dist * t);
       p.obj.position.copy(p.obj.userData.home).add(tmp);
     }
-    const show = t > 0.04 && labelsOn;
+    const show = t > 0.05 && labelsOn && selected == null;
     for (const l of labels) {
-      l.element.style.opacity = show ? Math.min(1, (t - 0.04) * 3) : 0;
-    }
-    for (const g of guides) {
-      g.visible = t > 0.04;
-      g.material.opacity = 0.28 * Math.min(1, t * 1.5);
+      if (l.element.classList.contains("stage")) {
+        l.element.style.opacity = t > 0.4 && selected == null ? Math.min(1, (t - 0.4) * 4) : 0;
+        continue;
+      }
+      l.element.style.opacity = show ? Math.min(1, (t - 0.05) * 3) : 0;
     }
   }
+  var SPECS = {
+    1: { name: "Housing head assembly", spec: "Shared head/manifold with 25 mm BSP inlet & outlet ports and red pressure-relief buttons. The three caps thread up into it; bowls seal against it." },
+    2: { name: "Inlet / outlet fitting", spec: "Lead-free brass 25 mm BSP union \u2014 mains in, filtered out. No PTFE tape; seals on the supplied compression seal." },
+    3: { name: "Fitting seal / stand-pipe", spec: "Compression seal that seats each fitting/stand-pipe into the head. Replace if perished." },
+    4: { name: "Filter housing bowl", spec: "White 20 \xD7 4.5\u2033 housing bowl \u2014 three per system. Dual O-ring compression seal; unthreads downward for cartridge service." },
+    5: { name: "Filter cartridge (\xD73)", spec: "Three stages: 1st pleated sediment 5\xB5m \u2192 2nd grooved GPSS 5>1\xB5m \u2192 3rd carbon / Hydro-Flow 0.5\u20130.22\xB5m. Replace every 12 months (\xB13)." },
+    6: { name: "O-ring / housing seal", spec: "Food-grade seal at the bowl-to-head joint. Inspect & lubricate at each cartridge change." },
+    7: { name: "Frame / chassis", spec: "Powder-coated stainless frame holding the three housings. Freestanding, wall-mount, or optional stand. 595 \xD7 752 \xD7 212 mm." },
+    8: { name: "Pressure gauge (\xD73)", spec: "One gauge per stage. A pressure drop signals cartridges are due. Operating range 175\u2013800 kPa." },
+    9: { name: "Stainless fixings", spec: "Stainless fasteners securing housings and head to the frame." },
+    10: { name: "Front cover / cabinet", spec: "Lockable powder-coated front cover \u2014 Dover White as standard, 21 AR COLORBOND\xAE colours optional. Lifts off for service." }
+  };
+  var callout = document.getElementById("callout");
+  var selected = null;
+  function setSelected(num) {
+    selected = num;
+    for (const m of allMeshes) {
+      const on = m.userData.partNum === num;
+      if (num == null || on) {
+        m.material.opacity = m.userData.baseOpacity;
+        m.material.transparent = m.userData.baseTransparent;
+        m.material.depthWrite = true;
+        if (m.userData.baseEmissive) m.material.emissive.copy(m.userData.baseEmissive);
+        if (num != null && on && m.userData.baseEmissive) m.material.emissive.setHex(4865822);
+      } else {
+        m.material.transparent = true;
+        m.material.opacity = 0.06;
+        m.material.depthWrite = false;
+        if (m.userData.baseEmissive) m.material.emissive.copy(m.userData.baseEmissive);
+      }
+    }
+    if (num == null) callout.classList.remove("show");
+    else {
+      const s = SPECS[num];
+      callout.querySelector(".cn").textContent = num;
+      callout.querySelector(".ct").textContent = s.name;
+      callout.querySelector(".cd").textContent = s.spec;
+      callout.classList.add("show");
+    }
+    document.querySelectorAll(".legend li").forEach((li) => li.classList.toggle("active", +li.dataset.num === num));
+  }
+  var ray = new Raycaster();
+  var nd = new Vector2();
+  function pick(e) {
+    const r = renderer.domElement.getBoundingClientRect();
+    nd.x = (e.clientX - r.left) / r.width * 2 - 1;
+    nd.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+    ray.setFromCamera(nd, camera);
+    const h = ray.intersectObjects(allMeshes, false);
+    return h.length ? h[0].object.userData.partNum : null;
+  }
+  var dn = null;
+  var drag = false;
+  renderer.domElement.addEventListener("pointerdown", (e) => {
+    dn = [e.clientX, e.clientY];
+    drag = false;
+  });
+  renderer.domElement.addEventListener("pointermove", (e) => {
+    if (dn && Math.hypot(e.clientX - dn[0], e.clientY - dn[1]) > 6) drag = true;
+    renderer.domElement.style.cursor = pick(e) != null ? "pointer" : "grab";
+  });
+  renderer.domElement.addEventListener("click", (e) => {
+    if (drag) return;
+    setSelected(pick(e));
+  });
+  document.querySelectorAll(".legend li").forEach((li) => li.addEventListener("click", () => {
+    const n = +li.dataset.num;
+    setSelected(selected === n ? null : n);
+  }));
+  document.getElementById("calloutX").addEventListener("click", () => setSelected(null));
   var slider = document.getElementById("explode");
   var toggleBtn = document.getElementById("toggle");
   var labelsBtn = document.getElementById("labels");
@@ -20988,18 +20977,18 @@
   var resetBtn = document.getElementById("reset");
   var labelsOn = true;
   var autoSpin = false;
-  function setSlider(v) {
+  var setS = (v) => {
     slider.value = v;
     slider.style.setProperty("--p", v + "%");
-  }
+  };
   slider.addEventListener("input", () => {
     target = slider.value / 100;
-    setSlider(slider.value);
+    setS(slider.value);
     toggleBtn.textContent = target > 0.5 ? "Collapse \u25C2" : "Explode \u25B8";
   });
   toggleBtn.addEventListener("click", () => {
     target = target > 0.5 ? 0 : 1;
-    setSlider(Math.round(target * 100));
+    setS(Math.round(target * 100));
     toggleBtn.textContent = target > 0.5 ? "Collapse \u25C2" : "Explode \u25B8";
   });
   labelsBtn.addEventListener("click", () => {
@@ -21015,85 +21004,13 @@
     camera.position.copy(home.pos);
     controls.target.copy(home.tgt);
   });
-  setSlider(0);
+  setS(0);
   addEventListener("resize", () => {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
     labelRenderer.setSize(innerWidth, innerHeight);
   });
-  var SPECS = {
-    1: { name: "Housing head assembly", spec: "Reinforced head shared across all three stages, with 25 mm BSP inlet/outlet ports and a pressure-relief button. The bowls thread up into it." },
-    2: { name: "Inlet / outlet fitting", spec: "Lead-free brass 25 mm BSP union. Connects cold mains in and filtered water out. No PTFE tape \u2014 seals on the supplied compression seal." },
-    3: { name: "Fitting seal / stand-pipe", spec: "Compression seal and stand-pipe that locate and seal each fitting into the head. Replace if perished." },
-    4: { name: "Filter housing bowl", spec: "Stainless 20 \xD7 4.5\u2033 housing bowl with dual O-ring compression seal \u2014 three per system. Unthreads downward for cartridge service." },
-    5: { name: "Filter cartridge (\xD73)", spec: "Three-stage set: pleated sediment 5\xB5m \u2192 grooved GPSS 5>1\xB5m \u2192 carbon / Hydro-Flow 0.5\u20130.22\xB5m. Install in order; replace every 12 months (\xB13)." },
-    6: { name: "O-ring / housing seal", spec: "Food-grade housing seal at the bowl-to-head joint. Inspect and lubricate at every cartridge change." },
-    7: { name: "Mounting bracket / frame", spec: "Stainless frame (595 mm wide). Freestanding on its feet, wall-mounted via the hole template, or on the optional stainless stand." },
-    8: { name: "Pressure gauge (\xD73)", spec: "Per-stage gauge. A drop in pressure signals cartridges are due for replacement. Operating range 175\u2013800 kPa." },
-    9: { name: "Stainless screw / fixings", spec: "Stainless fasteners securing the housings and head to the mounting bracket." }
-  };
-  var callout = document.getElementById("callout");
-  var selected = null;
-  function setSelected(num) {
-    selected = num;
-    for (const m of allMeshes) {
-      const on = m.userData.partNum === num;
-      if (num == null || on) {
-        m.material.opacity = m.userData.baseOpacity;
-        m.material.transparent = m.userData.baseTransparent;
-        if (m.userData.baseEmissive) m.material.emissive.copy(m.userData.baseEmissive);
-        if (num != null && on && m.userData.baseEmissive) m.material.emissive.setHex(4865822);
-      } else {
-        m.material.transparent = true;
-        m.material.opacity = 0.07;
-        m.material.depthWrite = false;
-        if (m.userData.baseEmissive) m.material.emissive.copy(m.userData.baseEmissive);
-      }
-      if (num == null) m.material.depthWrite = true;
-    }
-    if (num == null) {
-      callout.classList.remove("show");
-    } else {
-      const s = SPECS[num];
-      callout.querySelector(".cn").textContent = num;
-      callout.querySelector(".ct").textContent = s.name;
-      callout.querySelector(".cd").textContent = s.spec;
-      callout.classList.add("show");
-    }
-    document.querySelectorAll(".legend li").forEach((li) => li.classList.toggle("active", +li.dataset.num === num));
-  }
-  var ray = new Raycaster();
-  var ndc = new Vector2();
-  function pick(e) {
-    const r = renderer.domElement.getBoundingClientRect();
-    ndc.x = (e.clientX - r.left) / r.width * 2 - 1;
-    ndc.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-    ray.setFromCamera(ndc, camera);
-    const hits = ray.intersectObjects(allMeshes, false);
-    return hits.length ? hits[0].object.userData.partNum : null;
-  }
-  var downXY = null;
-  var dragged = false;
-  renderer.domElement.addEventListener("pointerdown", (e) => {
-    downXY = [e.clientX, e.clientY];
-    dragged = false;
-  });
-  renderer.domElement.addEventListener("pointermove", (e) => {
-    if (downXY && Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]) > 6) dragged = true;
-    renderer.domElement.style.cursor = pick(e) != null ? "pointer" : "grab";
-  });
-  renderer.domElement.addEventListener("click", (e) => {
-    if (dragged) return;
-    setSelected(pick(e));
-  });
-  document.querySelectorAll(".legend li").forEach((li) => {
-    li.addEventListener("click", () => {
-      const n = +li.dataset.num;
-      setSelected(selected === n ? null : n);
-    });
-  });
-  document.getElementById("calloutX").addEventListener("click", () => setSelected(null));
   function tick() {
     requestAnimationFrame(tick);
     current += (target - current) * 0.12;
