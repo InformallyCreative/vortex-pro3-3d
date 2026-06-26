@@ -13480,8 +13480,8 @@
             currentColorMask = colorMask;
           }
         },
-        setLocked: function(lock2) {
-          locked = lock2;
+        setLocked: function(lock) {
+          locked = lock;
         },
         setClear: function(r, g2, b, a, premultipliedAlpha) {
           if (premultipliedAlpha === true) {
@@ -13554,8 +13554,8 @@
             currentDepthFunc = depthFunc;
           }
         },
-        setLocked: function(lock2) {
-          locked = lock2;
+        setLocked: function(lock) {
+          locked = lock;
         },
         setClear: function(depth) {
           if (currentDepthClear !== depth) {
@@ -13613,8 +13613,8 @@
             currentStencilZPass = stencilZPass;
           }
         },
-        setLocked: function(lock2) {
-          locked = lock2;
+        setLocked: function(lock) {
+          locked = lock;
         },
         setClear: function(stencil) {
           if (currentStencilClear !== stencil) {
@@ -20655,7 +20655,7 @@
   ground.receiveShadow = true;
   scene.add(ground);
   var M = {
-    cover: new MeshStandardMaterial({ color: 15987436, metalness: 0.05, roughness: 0.38 }),
+    cover: new MeshStandardMaterial({ color: 16316661, metalness: 0.06, roughness: 0.3, envMapIntensity: 1.1 }),
     frame: new MeshStandardMaterial({ color: 2894894, metalness: 0.3, roughness: 0.55 }),
     frameDk: new MeshStandardMaterial({ color: 2105378, metalness: 0.35, roughness: 0.5 }),
     housing: new MeshStandardMaterial({ color: 16053230, metalness: 0, roughness: 0.5 }),
@@ -20845,14 +20845,12 @@
     labels.push(so);
   });
   var cover = new Group();
-  var panel = rbox(W + 0.8, H + 0.2, 4.6, 2.6, M.cover);
-  panel.position.set(0, H / 2 - 1.2, D / 2 + 0.7);
-  var hood = cyl(3.5, 3.5, W + 0.8, M.cover, 32);
-  hood.rotation.z = Math.PI / 2;
-  hood.position.set(0, H - 1.4, D / 2 + 1.6);
-  var hoodTop = box(W + 0.8, 3.5, 4, M.cover);
-  hoodTop.position.set(0, H - 1.4, D / 2 - 0.4);
-  cover.add(panel, hood, hoodTop);
+  var panel = rbox(W + 1, H + 0.6, 5.6, 3.8, M.cover);
+  panel.position.set(0, H / 2, D / 2 + 0.9);
+  var seam = box(W - 1.5, 0.22, 0.5, M.frameDk);
+  seam.position.set(0, H - 12, D / 2 + 3.7);
+  cover.add(panel, seam);
+  var COVERZ = D / 2 + 3.7;
   var lc = document.createElement("canvas");
   lc.width = 300;
   lc.height = 120;
@@ -20864,15 +20862,19 @@
   var logoTex = new CanvasTexture(lc);
   logoTex.anisotropy = 8;
   var logo = new Mesh(new PlaneGeometry(9, 3.6), new MeshBasicMaterial({ map: logoTex, transparent: true }));
-  logo.position.set(W / 2 - 9, H - 8, D / 2 + 3.15);
+  logo.position.set(W / 2 - 9, H - 8.5, COVERZ + 0.05);
   cover.add(logo);
-  var lock = box(0.8, 7, 0.6, M.frameDk);
-  lock.position.set(W / 2 - 2.5, H / 2 - 4, D / 2 + 3.05);
-  cover.add(lock);
-  var lockBtn = cyl(0.6, 0.6, 0.5, M.chrome);
-  lockBtn.rotation.x = Math.PI / 2;
-  lockBtn.position.set(W / 2 - 2.5, H / 2 + 2, D / 2 + 3.25);
-  cover.add(lockBtn);
+  var handle = rbox(2, 13, 1.2, 0.9, M.frameDk);
+  handle.position.set(W / 2 - 5, H * 0.42, COVERZ - 0.4);
+  cover.add(handle);
+  var lockRing = cyl(1.3, 1.3, 0.6, M.frameDk, 24);
+  lockRing.rotation.x = Math.PI / 2;
+  lockRing.position.set(W / 2 - 5, H * 0.42 + 9.5, COVERZ);
+  cover.add(lockRing);
+  var lockPin = cyl(0.55, 0.55, 0.7, M.chrome, 16);
+  lockPin.rotation.x = Math.PI / 2;
+  lockPin.position.set(W / 2 - 5, H * 0.42 + 9.5, COVERZ + 0.2);
+  cover.add(lockPin);
   root.add(reg(cover, [0, 1, 0.06], 90, 10));
   addLabel(10, "Front cover", new Vector3(0, H - 7, D / 2 + 3), cover);
   addLabel(1, "Head assembly", new Vector3(0, H - 8, 0), head);
